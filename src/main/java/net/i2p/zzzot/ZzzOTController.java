@@ -68,10 +68,10 @@ public class ZzzOTController implements ClientApp {
 
     private ClientAppState _state = UNINITIALIZED;
 
-    private static final String NAME = "ZzzOT";
-    private static final String CONFIG_FILE = "zzzot.config";
-    private static final String BACKUP_SUFFIX = ".jetty6";
-    private static final String[] xmlFiles = {
+    public static final String NAME = "ZzzOT";
+    public static final String CONFIG_FILE = "zzzot.config";
+    public static final String BACKUP_SUFFIX = ".jetty6";
+    public static final String[] xmlFiles = {
         "jetty.xml", "contexts/base-context.xml", "contexts/cgi-context.xml",
         "etc/realm.properties", "etc/webdefault.xml" };
 

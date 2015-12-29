@@ -1,22 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="all" name="i2psnark">
-    <property name="i2pbase" value="../../i2p.i2p"/>
-    <property name="i2plib" value="${i2pbase}/build"/>
-    <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
-    <path id="cp">
+<project basedir="." default="all" name="zzzot-src">
+    <property name="dir.i2p" value="../../../i2p/i2p.i2p"/>
+    <property name="lib.i2p" value="${dir.i2p}/build"/>
+    <property name="lib.jetty" value="${dir.i2p}/apps/jetty/jettylib"/>
+    <property name="lib.test" value="../lib/"/>
+
+	<property name="build.dir" value="build"/>
+    <property name="main.build.dir" value="build/main/"/>
+    <property name="main.src.dir" value="main/java"/>
+    <property name="test.build.dir" value="build/test/"/>
+    <property name="test.src.dir" value="test/java"/>
+
+    <path id="main.classpath">
         <pathelement path="${java.class.path}" />
-        <pathelement location="${i2plib}/i2p.jar" />
-        <pathelement location="${i2plib}/i2ptunnel.jar" />
-        <pathelement location="${i2plib}/i2psnark.jar" />
-        <pathelement location="${i2plib}/mstreaming.jar" />
+        <pathelement location="${lib.i2p}/i2p.jar" />
+        <pathelement location="${lib.i2p}/i2ptunnel.jar" />
+        <pathelement location="${lib.i2p}/i2psnark.jar" />
+        <pathelement location="${lib.i2p}/mstreaming.jar" />
+		<pathelement location="${lib.i2p}/systray.jar" />
+        <pathelement location="${lib.jetty}/org.mortbay.jetty.jar"/>
+        <pathelement location="${lib.jetty}/jasper-runtime.jar" />
+        <pathelement location="${lib.jetty}/javax.servlet.jar" />
+        <pathelement location="${lib.jetty}/jetty-util.jar" />
+        <pathelement location="${lib.jetty}/jetty-xml.jar" />
+        <pathelement location="${lib.jetty}/commons-logging.jar" />
+        <pathelement location="${lib.jetty}/commons-el.jar" />
+    </path>
+
+    <path id="test.classpath">
+		<!--
+		<pathelement location="build/zzzot.jar" />
+		-->
         <pathelement location="${ant.home}/lib/ant.jar"/>
-        <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
-        <pathelement location="${jettylib}/jasper-runtime.jar" />
-        <pathelement location="${jettylib}/javax.servlet.jar" />
-        <pathelement location="${jettylib}/jetty-util.jar" />
-        <pathelement location="${jettylib}/jetty-xml.jar" />
-        <pathelement location="${jettylib}/commons-logging.jar" />
-        <pathelement location="${jettylib}/commons-el.jar" />
+		<pathelement location="${lib.test}/junit-4.12.jar" />
+		<pathelement location="${lib.test}/cglib-nodep-2.2.2.jar" />
+		<pathelement location="${lib.test}/hamcrest-all-1.3.jar" />
+		<pathelement location="${lib.test}/javassist-3.20.0-GA.jar" />
+		<pathelement location="${lib.test}/mockito-all-1.10.19.jar" />
+		<pathelement location="${lib.test}/mockito-core-1.10.19.jar" />
+		<pathelement location="${lib.test}/objenesis-2.1.jar" />
+		<pathelement location="${lib.test}/objenesis-2.2.jar" />
+		<pathelement location="${lib.test}/powermock-mockito-1.6.3-full.jar" />
+
+		<pathelement location="/home/chris/Development/i2p-git/i2p.plugins.zzzot/src/build/main" />
+		<pathelement location="/home/chris/Development/i2p-git/i2p.plugins.zzzot/src/build/test" />
+
+		<path refid="main.classpath" />
     </path>
 
     <target name="all" depends="clean, build" />
@@ -27,29 +56,41 @@
     <property name="javac.compilerargs" value="" />
 
     <target name="compile">
-        <mkdir dir="./build" />
-        <mkdir dir="./build/obj" />
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${main.build.dir}" />
         <javac 
-            srcdir="./java" 
-            debug="true" deprecation="on" source="1.5" target="1.5" 
-            destdir="./build/obj" 
-            includeAntRuntime="false"
-            classpath="${i2plib}/i2p.jar:${i2plib}/i2ptunnel.jar:${i2plib}/i2psnark.jar:${i2plib}/mstreaming.jar:${i2plib}/systray.jar:${jettylib}/org.mortbay.jetty.jar:${jettylib}/jetty-util.jar:${jettylib}/jetty-xml.jar" >
+            srcdir="${main.src.dir}" 
+            debug="true" deprecation="on" source="1.7" target="1.7" 
+            destdir="${main.build.dir}" 
+            includeAntRuntime="false">
             <compilerarg line="${javac.compilerargs}" />
+			<classpath refid="main.classpath" />
         </javac>
     </target>
 
+	<target name="compile-test" depends="compile">
+        <mkdir dir="${test.build.dir}" />
+        <javac 
+            srcdir="${test.src.dir}" 
+            debug="true" deprecation="on" source="1.7" target="1.7" 
+            destdir="${test.build.dir}" 
+            includeAntRuntime="false">
+			<classpath refid="test.classpath" />
+            <compilerarg line="${javac.compilerargs}" />
+        </javac>
+	</target>
+
     <target name="jar" depends="builddep, compile">
-        <jar destfile="build/zzzot.jar" basedir="./build/obj" includes="**/*.class" >
+        <jar destfile="build/zzzot.jar" basedir="${main.build.dir}" includes="**/*.class" >
         </jar>
     </target>    
 
     <target name="precompilejsp" depends="compile" >
-        <mkdir dir="build" />
+        <mkdir dir="${build.dir}" />
         <mkdir dir="build/war/WEB-INF/classes" />
         <path id="jspcp">
-            <path refid="cp" />
-            <pathelement location="build/obj" />
+            <path refid="main.classpath" />
+            <pathelement location="${main.build.dir}" />
         </path>
         <java classname="org.apache.jasper.JspC" fork="true" classpathref="jspcp" failonerror="true">
             <arg value="-d" />
@@ -60,13 +101,13 @@
             <arg value="-webinc" />
             <arg value="build/web-fragment.xml" />
             <arg value="-webapp" />
-            <arg value="jsp/" />
+            <arg value="./main/jsp/" />
         </java>
 
         <javac
             debug="true"
             deprecation="on"
-            source="1.5" target="1.5" 
+            source="1.7" target="1.7" 
             destdir="build/war/WEB-INF/classes"
             srcdir="./build/jspjava"
             includes="**/*.java"
@@ -74,7 +115,7 @@
             classpathref="jspcp"
             failonerror="true" />
 
-        <copy file="jsp/WEB-INF/web.xml" tofile="build/web.xml" />
+        <copy file="main/jsp/WEB-INF/web.xml" tofile="build/web.xml" />
         <loadfile property="jspc.web.fragment" srcfile="build/web-fragment.xml" />
         <replace file="build/web.xml">
             <replacefilter token="&lt;!-- precompiled servlets --&gt;" value="${jspc.web.fragment}" />
@@ -83,18 +124,47 @@
     </target>
 
     <target name="war" depends="precompilejsp"> 
-        <copy file="jsp/index.html" todir="build/war" />
+        <copy file="main/jsp/index.html" todir="build/war" />
         <war destfile="build/tracker.war.jar" webxml="build/web.xml">
             <fileset dir="build/war" />
         </war>
     </target>
     
     <target name="clean">
-        <delete dir="./build" />
+        <delete dir="${build.dir}" />
     </target>
 
     <target name="cleandep" depends="clean">
     </target>
     <target name="distclean" depends="clean">
     </target>
+
+	<target name="test" depends="compile-test">
+
+		<pathconvert property="classpathProp" refid="test.classpath"/>
+		<echo>path is ${classpathProp}</echo>
+		<echo>test.build.dir: ${test.build.dir}</echo>
+		<echo>main.build.dir: ${main.build.dir}</echo>
+		<echo>cwd: ${user.dir}</echo>
+		<echo>basedir: ${basedir}</echo>
+
+        <junit fork="no" haltonfailure="yes" printsummary="yes">
+			<formatter type="plain" usefile="false"/>
+
+			<classpath>
+				<path refid="test.classpath" />
+			</classpath>
+
+            <batchtest fork="yes">
+                <fileset dir="test/">
+					<!--
+					  - Only running one for POC
+                    <include name="**/*Test*.java" />
+					-->
+                    <include name="**/InfoHashTest.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+	</target>
+
 </project>

@@ -13,6 +13,10 @@
            <fileset dir="plugin/" includes="i2ptunnel.config zzzot.config eepsite/docroot/index.html eepsite/docroot/robots.txt" />
         </delete>
         <delete dir="plugin/eepsite/docroot/torrents/" />
+
+        <mkdir dir="plugin/lib/" />
+        <mkdir dir="plugin/eepsite/webapps/" />
+
         <!-- get version number -->
         <buildnumber file="scripts/build.number" />
         <property name="release.number" value="0.14.0" />
@@ -22,6 +26,7 @@
         <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
         <copy file="README.txt" todir="plugin/" overwrite="true" />
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
+
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="update-only=true" />
         </exec>
@@ -87,5 +92,11 @@
         <delete file="plugin.zip" />
         <delete dir="plugin/eepsite/docroot/torrents/" />
     </target>
+
+    <!--<target name="test" depends="plugin">-->
+    <target name="test">
+        <ant dir="src" target="test" />
+    </target>
+
 
 </project>
